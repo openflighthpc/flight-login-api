@@ -36,6 +36,7 @@ require 'yaml'
 require 'json'
 require 'pathname'
 require 'time'
+require 'securerandom'
 
 if ENV['RACK_ENV'] == 'development'
   Bundler.require(:default, :development)
@@ -51,8 +52,11 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'flight_web_auth'
 
-# Ensures the config has been loaded
-# XXX: Consider changing to a load method
-FlightWebAuth.app.config
+# Ensure a shared secret exists
+unless File.exists? FlightWebAuth.app.config.shared_secret_path
+  FlightWebAuth.logger.warn "Generating a shared secret"
+  File.write FlightWebAuth.config.shared_secret_path, SecureRandom.alphanumeric(40)
+  FileUtils.chmod 0400, FlightWebAuth.config.shared_secret_path
+end
 
 require_relative '../app'

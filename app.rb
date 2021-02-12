@@ -75,6 +75,12 @@ use Rack::Parser, parsers: {
   'application/json' => ->(body) { JSON.parse(body) }
 }
 
+helpers do
+  def shared_secret
+    @shared_secret ||= File.read(FlightWebAuth.config.shared_secret_path)
+  end
+end
+
 post '/sign-in' do
   # Extract the username/password
   account = params.fetch('account', {})
@@ -108,7 +114,7 @@ post '/sign-in' do
   payload = {
     username: passwd.name,
     name: passwd.gecos,
-    authentication_token: JWT.encode(jwt_body, FlightWebAuth.config.shared_secret, 'HS256')
+    authentication_token: JWT.encode(jwt_body, shared_secret, 'HS256')
   }
 
   # Return the payload

@@ -58,10 +58,10 @@ module FlightWebAuth
         default: 'web-auth'
       },
       {
-        name: 'shared_secret',
+        name: 'shared_secret_path',
         env_var: true,
-        default: ->(_) do
-          raise ConfigError, 'the shared_secret has not been set'
+        default: ->(root) do
+          root.join('etc/shared-secret.conf')
         end
       },
       {
