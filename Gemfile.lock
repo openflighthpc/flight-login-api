@@ -16,6 +16,7 @@ GEM
     fiber-local (1.0.0)
     i18n (1.8.5)
       concurrent-ruby (~> 1.0)
+    jwt (2.2.2)
     method_source (1.0.0)
     minitest (5.14.2)
     mustermann (1.1.1)
@@ -30,6 +31,8 @@ GEM
     puma (5.1.1)
       nio4r (~> 2.0)
     rack (2.2.3)
+    rack-parser (0.7.0)
+      rack
     rack-protection (2.1.0)
       rack
     rack-test (1.1.0)
@@ -69,9 +72,11 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   console
+  jwt
   pry
   pry-byebug
   puma
+  rack-parser
   rack-test
   rake
   rpam-ruby19

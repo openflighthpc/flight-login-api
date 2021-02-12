@@ -79,8 +79,8 @@ class NotFound < HttpError
   end
 end
 
-class UserNotFound < HttpError
-  self.default_http_status = 404
+class NotAcceptable < HttpError
+  self.default_http_status = 406
 end
 
 class InternalServerError < HttpError
@@ -90,6 +90,10 @@ class UnexpectedError < InternalServerError; end
 
 class UnsupportedMediaType < HttpError
   self.default_http_status = 415
+end
+
+class UnprocessableEntity < HttpError
+  self.default_http_status = 422
 end
 
 class Unauthorized < HttpError

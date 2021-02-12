@@ -35,13 +35,33 @@
 #-------------------------------------------------------------------------------
 # Pam Authentication Service
 # Specify the pam service which will be used to authenticate the requests.
-# The environment variable FLIGHT_WEB_AUTH_PAM_SERVICE
+# The environment variable FLIGHT_WEB_AUTH_PAM_SERVICE takes precedence
 #
 # CAUTION: All authenticated requests must correspond with a linux user. Failure
 #          to do so will cause the cloudcmd process to fail. This should be the
 #          case for any pam service which uses 'pam_unix.so'.
 #-------------------------------------------------------------------------------
 # pam_service: login
+
+#-------------------------------------------------------------------------------
+# Shared Secret
+# A private token which is used to cryptographically sign the genreate token.
+# The environment variable FLIGHT_WEB_AUTH_SHARED_SECRET will set this field
+#-------------------------------------------------------------------------------
+# shared_secret:
+
+#-------------------------------------------------------------------------------
+# Token Expiry
+# How long the generated token is valid for in days.
+#-------------------------------------------------------------------------------
+# token_expiry: 7
+
+#-------------------------------------------------------------------------------
+# Issuer
+# Used to set the iss field in the JWT
+# The environment variable FLIGHT_WEB_AUTH_ISSUER takes precedence
+#-------------------------------------------------------------------------------
+# issuer: web-auth
 
 #-------------------------------------------------------------------------------
 # Log Level

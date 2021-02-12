@@ -36,7 +36,7 @@ module FlightWebAuth
       end
 
       def load
-        merged = defaults.merge(from_config_files).merge(from_env_vars)
+        merged = apply_defaults(from_config_files.merge(from_env_vars))
         Configuration.new.tap do |config|
           merged.each do |key, value|
             config.send("#{key}=", value)
@@ -46,16 +46,16 @@ module FlightWebAuth
         raise e, "Cannot load configuration:\n#{e.message}", e.backtrace
       end
 
-      def defaults
-        Configuration::ATTRIBUTES.reduce({}) do |accum, attr|
-          if attr.key?(:default)
-            accum[attr[:name]] = attr[:default].respond_to?(:call) ?
-              attr[:default].call(@root) :
-              attr[:default]
-          end
-          accum
+      def apply_defaults(merged)
+        Configuration::ATTRIBUTES.each do |attr|
+          key = attr[:name].to_s
+          next if merged.key?(key)
+          next unless attr.key?(:default)
+
+          default = attr[:default]
+          merged[key] = default.respond_to?(:call) ? default.call(@root) : default
         end
-          .deep_transform_keys(&:to_s)
+        merged
       end
 
       def from_config_files

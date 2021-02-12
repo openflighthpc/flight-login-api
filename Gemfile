@@ -34,9 +34,11 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 gem 'activesupport', require: 'active_support'
 gem 'console'
 gem 'rake'
+gem 'rack-parser', :require => 'rack/parser'
 gem 'rpam-ruby19', require: 'rpam'
 gem 'puma'
 gem 'sinatra'
+gem 'jwt'
 
 group :development, :test do
   gem 'pry'

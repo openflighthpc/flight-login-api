@@ -27,7 +27,6 @@
 # https://github.com/openflighthpc/flight-web-auth-api
 #===============================================================================
 
-require 'securerandom'
 require_relative 'app/errors'
 
 configure do
@@ -46,7 +45,7 @@ error(HttpError) do
   level = (e.is_a?(UnexpectedError) ? :error : :debug)
   LOGGER.send level, e.full_message
   status e.http_status
-  { errors: [e] }.to_json
+  { errors: [e.message.chomp] }.to_json
 end
 
 # Catches all other errors and returns a generic Internal Server Error
@@ -56,14 +55,63 @@ error(StandardError) do
   { errors: ['An unexpected error has occurred!'] }.to_json
 end
 
-# Sets the response headers
-before do
-  content_type 'application/json'
-end
-
 class PamAuth
   def self.valid?(username, password)
     Rpam.auth(username, password, service: FlightWebAuth.config.pam_service)
   end
 end
 
+# Require the Content-Type and Accept headers to be set correctly
+before method: :post do
+  unless request.content_type == 'application/json'
+    raise UnsupportedMediaType, 'Content-Type must be application/json'
+  end
+  unless request.accept?('application/json')
+    raise NotAcceptable, 'Accept must be application/json'
+  end
+end
+
+use Rack::Parser, parsers: {
+  'application/json' => ->(body) { JSON.parse(body) }
+}
+
+post '/sign-in' do
+  # Extract the username/password
+  account = params.fetch('account', {})
+  username = account['username']
+  password = account['password']
+
+  # Ensure they have been provided
+  if username.nil?
+    raise UnprocessableEntity, 'The username has not been provided'
+  end
+  if password.nil?
+    raise UnprocessableEntity, 'The password has not been provided'
+  end
+
+  # Ensures the username/password is valid
+  unless PamAuth.valid?(username, password)
+    raise Forbidden, 'you do not have permission to access this service'
+  end
+
+  # Generates the responds
+  passwd = Etc.getpwnam(username)
+  now = Time.now.to_i
+  jwt_body = {
+    username: passwd.name,
+    name: passwd.gecos,
+    iat: now,
+    nbf: now,
+    exp: (now + FlightWebAuth.config.token_expiry * 86400),
+    iss: FlightWebAuth.config.issuer
+  }
+  payload = {
+    username: passwd.name,
+    name: passwd.gecos,
+    authentication_token: JWT.encode(jwt_body, FlightWebAuth.config.shared_secret, 'HS256')
+  }
+
+  # Return the payload
+  status 201
+  payload.to_json
+end

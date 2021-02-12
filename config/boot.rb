@@ -35,6 +35,7 @@ require 'bundler'
 require 'yaml'
 require 'json'
 require 'pathname'
+require 'time'
 
 if ENV['RACK_ENV'] == 'development'
   Bundler.require(:default, :development)

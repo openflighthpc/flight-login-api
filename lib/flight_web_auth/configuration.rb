@@ -48,6 +48,23 @@ module FlightWebAuth
         default: 'login'
       },
       {
+        name: 'token_expiry',
+        env_var: false,
+        default: 7
+      },
+      {
+        name: 'issuer',
+        env_var: true,
+        default: 'web-auth'
+      },
+      {
+        name: 'shared_secret',
+        env_var: true,
+        default: ->(_) do
+          raise ConfigError, 'the shared_secret has not been set'
+        end
+      },
+      {
         name: 'log_level',
         env_var: true,
         default: 'info'
