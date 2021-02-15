@@ -38,6 +38,7 @@ gem 'rack-parser', :require => 'rack/parser'
 gem 'rpam-ruby19', require: 'rpam'
 gem 'puma'
 gem 'sinatra'
+gem 'sinatra-cross_origin'
 gem 'jwt'
 
 group :development, :test do

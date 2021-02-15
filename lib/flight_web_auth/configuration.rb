@@ -43,6 +43,11 @@ module FlightWebAuth
         default: 'tcp://127.0.0.1:922'
       },
       {
+        name: 'cross_origin_domain',
+        env_var: true,
+        default: nil,
+      },
+      {
         name: 'pam_service',
         env_var: true,
         default: 'login'

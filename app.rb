@@ -27,11 +27,16 @@
 # https://github.com/openflighthpc/flight-web-auth-api
 #===============================================================================
 
+require 'sinatra'
+require 'sinatra/cross_origin'
+
 require_relative 'app/errors'
 
 configure do
   set :raise_errors, true
   set :show_exceptions, false
+
+  enable :cross_origin if FlightWebAuth.config.cross_origin_domain
 end
 
 not_found do
@@ -61,8 +66,22 @@ class PamAuth
   end
 end
 
+before do
+  if FlightWebAuth.config.cross_origin_domain
+    origin = FlightWebAuth.config.cross_origin_domain
+    if origin.to_s == 'any'
+      origin = request.env['HTTP_X_ORIGIN'] || request.env['HTTP_ORIGIN']
+    end
+    response.headers['Access-Control-Allow-Origin'] = origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+  end
+end
+
 # Require the Content-Type and Accept headers to be set correctly
 before method: :post do
+  # Not sure why we need this check, but we do.
+  next if env['REQUEST_METHOD'] == 'OPTIONS'
+
   unless request.content_type == 'application/json'
     raise UnsupportedMediaType, 'Content-Type must be application/json'
   end
@@ -78,6 +97,16 @@ use Rack::Parser, parsers: {
 helpers do
   def shared_secret
     @shared_secret ||= File.read(FlightWebAuth.config.shared_secret_path)
+  end
+end
+
+if FlightWebAuth.config.cross_origin_domain
+  options "*" do
+    response.headers["Allow"] = "POST, OPTIONS"
+    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept"
+    status 200
+    ''
   end
 end
 
