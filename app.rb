@@ -32,6 +32,20 @@ require 'sinatra/cross_origin'
 
 require_relative 'app/errors'
 
+# This regular expression is used to split the levels of a domain.
+# The top level domain can be any string without a period or
+# **.**, ***.** style TLDs like co.uk or com.au
+#
+# www.example.co.uk gives:
+# $& => example.co.uk
+#
+# example.com gives:
+# $& => example.com
+#
+# lots.of.subdomains.example.local gives:
+# $& => example.local
+DOMAIN_REGEXP = /[^.]*\.([^.]*|..\...|...\...)$/
+
 configure do
   set :raise_errors, true
   set :show_exceptions, false
@@ -98,6 +112,26 @@ helpers do
   def shared_secret
     @shared_secret ||= File.read(FlightWebAuth.config.shared_secret_path)
   end
+
+  def set_sso_cookie(auth_token, expires)
+    domain = 
+      if request.host == 'localhost'
+        'localhost'
+      elsif (request.host !~ /^[\d.]+$/) && (request.host =~ DOMAIN_REGEXP)
+        ".#{$&}"
+      end
+
+    response.set_cookie(
+      FlightWebAuth.app.config.sso_cookie_name,
+      value: auth_token,
+      domain: domain,
+      path: '/',
+      expires: Time.at(expires),
+      secure: request.scheme == 'https',
+      http_only: true,
+      same_site: :strict,
+    )
+  end
 end
 
 if FlightWebAuth.config.cross_origin_domain
@@ -132,19 +166,22 @@ post '/sign-in' do
   # Generates the responds
   passwd = Etc.getpwnam(username)
   now = Time.now.to_i
+  expires = now + FlightWebAuth.config.token_expiry * 86400
   jwt_body = {
     username: passwd.name,
     name: passwd.gecos,
     iat: now,
     nbf: now,
-    exp: (now + FlightWebAuth.config.token_expiry * 86400),
+    exp: expires,
     iss: FlightWebAuth.config.issuer
   }
+  auth_token = JWT.encode(jwt_body, shared_secret, 'HS256')
   payload = {
     username: passwd.name,
     name: passwd.gecos,
-    authentication_token: JWT.encode(jwt_body, shared_secret, 'HS256')
+    authentication_token: auth_token,
   }
+  set_sso_cookie(auth_token, expires)
 
   # Return the payload
   status 201

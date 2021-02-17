@@ -73,7 +73,12 @@ module FlightWebAuth
         name: 'log_level',
         env_var: true,
         default: 'info'
-      }
+      },
+      {
+        name: 'sso_cookie_name',
+        env_var: true,
+        default: 'flight_web_auth',
+      },
     ]
     attr_accessor(*ATTRIBUTES.map { |a| a[:name] })
 

@@ -79,3 +79,10 @@
 # Valid levels are: fatal, error, warn, info, debug
 #-------------------------------------------------------------------------------
 # log_level: info
+
+#-------------------------------------------------------------------------------
+# Cookie name
+# Specify the name to use for the sso cookie
+# The environment variable FLIGHT_WEB_AUTH_SSO_COOKIE_NAME takes precedence
+#-------------------------------------------------------------------------------
+# sso_cookie_name: flight_web_auth
