@@ -167,9 +167,10 @@ post '/sign-in' do
   passwd = Etc.getpwnam(username)
   now = Time.now.to_i
   expires = now + FlightWebAuth.config.token_expiry * 86400
+  gecos_name = (passwd.gecos || "").split(',').first
   jwt_body = {
     username: passwd.name,
-    name: passwd.gecos,
+    name: gecos_name,
     iat: now,
     nbf: now,
     exp: expires,
@@ -179,7 +180,7 @@ post '/sign-in' do
   payload = {
     user: {
       username: passwd.name,
-      name: passwd.gecos,
+      name: gecos_name,
       authentication_token: auth_token,
     }
   }
