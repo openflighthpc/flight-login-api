@@ -147,7 +147,7 @@ end
 post '/sign-in' do
   # Extract the username/password
   account = params.fetch('account', {})
-  username = account['username']
+  username = account['login']
   password = account['password']
 
   # Ensure they have been provided
@@ -177,9 +177,11 @@ post '/sign-in' do
   }
   auth_token = JWT.encode(jwt_body, shared_secret, 'HS256')
   payload = {
-    username: passwd.name,
-    name: passwd.gecos,
-    authentication_token: auth_token,
+    user: {
+      username: passwd.name,
+      name: passwd.gecos,
+      authentication_token: auth_token,
+    }
   }
   set_sso_cookie(auth_token, expires)
 
