@@ -173,7 +173,7 @@ post '/sign-in' do
 
   # Ensure they have been provided
   if username.nil?
-    raise UnprocessableEntity, 'The username has not been provided'
+    raise UnprocessableEntity, 'The login has not been provided'
   end
   if password.nil?
     raise UnprocessableEntity, 'The password has not been provided'
