@@ -79,6 +79,10 @@ module FlightWebAuth
         env_var: true,
         default: 'flight_web_auth',
       },
+      {
+        name: 'sso_cookie_domain',
+        env_var: true
+      }
     ]
     attr_accessor(*ATTRIBUTES.map { |a| a[:name] })
 

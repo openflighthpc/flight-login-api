@@ -32,20 +32,6 @@ require 'sinatra/cross_origin'
 
 require_relative 'app/errors'
 
-# This regular expression is used to split the levels of a domain.
-# The top level domain can be any string without a period or
-# **.**, ***.** style TLDs like co.uk or com.au
-#
-# www.example.co.uk gives:
-# $& => example.co.uk
-#
-# example.com gives:
-# $& => example.com
-#
-# lots.of.subdomains.example.local gives:
-# $& => example.local
-DOMAIN_REGEXP = /[^.]*\.([^.]*|..\...|...\...)$/
-
 configure do
   set :raise_errors, true
   set :show_exceptions, false
@@ -114,18 +100,10 @@ helpers do
     FlightWebAuth.config.shared_secret
   end
 
-  def sso_cookie_domain
-    if request.host == 'localhost'
-      'localhost'
-    elsif (request.host !~ /^[\d.]+$/) && (request.host =~ DOMAIN_REGEXP)
-      ".#{$&}"
-    end
-  end
-
   def set_sso_cookie(auth_token)
     response.set_cookie(
       FlightWebAuth.app.config.sso_cookie_name,
-      domain: sso_cookie_domain,
+      domain: FlightWebAuth.app.sso_cookie_domain,
       expires: Time.at(expiration),
       http_only: true,
       path: '/',

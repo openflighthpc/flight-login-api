@@ -52,6 +52,12 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'flight_web_auth'
 
+# Ensure the sso_cookie_domain is set
+unless FlightWebAuth.app.config.sso_cookie_domain
+  FlightWebAuth.logger.fatal "The sso_cookie_domain configuration has not been set!"
+  exit 1
+end
+
 # Ensure a shared secret exists
 unless File.exists? FlightWebAuth.app.config.shared_secret_path
   FlightWebAuth.logger.warn "Generating a shared secret"
