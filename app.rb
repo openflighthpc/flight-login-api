@@ -3,7 +3,7 @@
 #==============================================================================
 # Copyright (C) 2021-present Alces Flight Ltd.
 #
-# This file is part of Flight Web Auth.
+# This file is part of Flight Login.
 #
 # This program and the accompanying materials are made available under
 # the terms of the Eclipse Public License 2.0 which is available at
@@ -11,7 +11,7 @@
 # terms made available by Alces Flight Ltd - please direct inquiries
 # about licensing to licensing@alces-flight.com.
 #
-# Flight Web Auth is distributed in the hope that it will be useful, but
+# Flight Login is distributed in the hope that it will be useful, but
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR
 # IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS
 # OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
@@ -19,12 +19,12 @@
 # details.
 #
 # You should have received a copy of the Eclipse Public License 2.0
-# along with Flight Web Auth. If not, see:
+# along with Flight Login. If not, see:
 #
 #  https://opensource.org/licenses/EPL-2.0
 #
-# For more information on Flight Web Auth, please visit:
-# https://github.com/openflighthpc/flight-web-auth-api
+# For more information on Flight Login, please visit:
+# https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
 require 'sinatra'
@@ -36,7 +36,7 @@ configure do
   set :raise_errors, true
   set :show_exceptions, false
 
-  enable :cross_origin if FlightWebAuth.config.cross_origin_domain
+  enable :cross_origin if FlightLogin.config.cross_origin_domain
 end
 
 not_found do
@@ -62,13 +62,13 @@ end
 
 class PamAuth
   def self.valid?(username, password)
-    Rpam.auth(username, password, service: FlightWebAuth.config.pam_service)
+    Rpam.auth(username, password, service: FlightLogin.config.pam_service)
   end
 end
 
 before do
-  if FlightWebAuth.config.cross_origin_domain
-    origin = FlightWebAuth.config.cross_origin_domain
+  if FlightLogin.config.cross_origin_domain
+    origin = FlightLogin.config.cross_origin_domain
     if origin.to_s == 'any'
       origin = request.env['HTTP_X_ORIGIN'] || request.env['HTTP_ORIGIN']
     end
@@ -97,13 +97,13 @@ use Rack::Parser, parsers: {
 
 helpers do
   def shared_secret
-    FlightWebAuth.config.shared_secret
+    FlightLogin.config.shared_secret
   end
 
   def set_sso_cookie(auth_token)
     response.set_cookie(
-      FlightWebAuth.app.config.sso_cookie_name,
-      domain: FlightWebAuth.app.sso_cookie_domain,
+      FlightLogin.app.config.sso_cookie_name,
+      domain: FlightLogin.config.sso_cookie_domain,
       expires: Time.at(expiration),
       http_only: true,
       path: '/',
@@ -115,8 +115,8 @@ helpers do
 
   def delete_sso_cookie
     response.delete_cookie(
-      FlightWebAuth.app.config.sso_cookie_name,
-      domain: sso_cookie_domain,
+      FlightLogin.app.config.sso_cookie_name,
+      domain: FlightLogin.config.sso_cookie_domain,
       http_only: true,
       path: '/',
       same_site: :strict,
@@ -129,7 +129,7 @@ helpers do
   end
 
   def expiration
-    timestamp_now + FlightWebAuth.config.token_expiry * 86400
+    timestamp_now + FlightLogin.config.token_expiry * 86400
   end
 
   def create_auth_token(passwd, gecos_name)
@@ -139,7 +139,7 @@ helpers do
       iat: timestamp_now,
       nbf: timestamp_now,
       exp: expiration,
-      iss: FlightWebAuth.config.issuer
+      iss: FlightLogin.config.issuer
     }
     JWT.encode(jwt_body, shared_secret, 'HS256')
   end
@@ -155,7 +155,7 @@ helpers do
   end
 end
 
-if FlightWebAuth.config.cross_origin_domain
+if FlightLogin.config.cross_origin_domain
   options "*" do
     response.headers["Allow"] = "GET, DELETE, POST, OPTIONS"
     response.headers["Access-Control-Allow-Methods"] = "GET, DELETE, POST, OPTIONS"
@@ -195,8 +195,8 @@ post '/sign-in' do
 end
 
 get '/session' do
-  auth = FlightWebAuth::Auth.build(
-    request.cookies[FlightWebAuth.app.config.sso_cookie_name], env['HTTP_AUTHORIZATION']
+  auth = FlightLogin::Auth.build(
+    request.cookies[FlightLogin.app.config.sso_cookie_name], env['HTTP_AUTHORIZATION']
   )
 
   unless auth.valid?

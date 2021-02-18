@@ -1,7 +1,7 @@
 #==============================================================================
 # Copyright (C) 2021-present Alces Flight Ltd.
 #
-# This file is part of Flight Web Auth.
+# This file is part of Flight Login.
 #
 # This program and the accompanying materials are made available under
 # the terms of the Eclipse Public License 2.0 which is available at
@@ -9,7 +9,7 @@
 # terms made available by Alces Flight Ltd - please direct inquiries
 # about licensing to licensing@alces-flight.com.
 #
-# Flight Web Auth is distributed in the hope that it will be useful, but
+# Flight Login is distributed in the hope that it will be useful, but
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR
 # IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS
 # OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
@@ -17,18 +17,18 @@
 # details.
 #
 # You should have received a copy of the Eclipse Public License 2.0
-# along with Flight Web Auth. If not, see:
+# along with Flight Login. If not, see:
 #
 #  https://opensource.org/licenses/EPL-2.0
 #
-# For more information on Flight Web Auth, please visit:
-# https://github.com/openflighthpc/flight-web-auth-api
+# For more information on Flight Login, please visit:
+# https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
 #-------------------------------------------------------------------------------
 # Bind Address
 # The address the api process will bind to
-# The environment variable FLIGHT_WEB_AUTH_BIND_ADDRESS takes precedence
+# The environment variable FLIGHT_LOGIN_BIND_ADDRESS takes precedence
 #-------------------------------------------------------------------------------
 # bind_address: tcp://127.0.0.1:922
 
@@ -36,14 +36,14 @@
 #-------------------------------------------------------------------------------
 # Cross Origin Domain
 # Optional domain(s) to permit cross original requests from.
-# The environment variable FLIGHT_WEB_AUTH_CROSS_ORIGIN_DOMAIN takes precedence
+# The environment variable FLIGHT_LOGIN_CROSS_ORIGIN_DOMAIN takes precedence
 #-------------------------------------------------------------------------------
 # cross_origin_domain: any
 
 #-------------------------------------------------------------------------------
 # Pam Authentication Service
 # Specify the pam service which will be used to authenticate the requests.
-# The environment variable FLIGHT_WEB_AUTH_PAM_SERVICE takes precedence
+# The environment variable FLIGHT_LOGIN_PAM_SERVICE takes precedence
 #
 # CAUTION: All authenticated requests must correspond with a linux user. Failure
 #          to do so will cause the cloudcmd process to fail. This should be the
@@ -54,11 +54,11 @@
 #-------------------------------------------------------------------------------
 # Shared Secret Path
 # A private token which is used to cryptographically sign the generate token.
-# The environment variable FLIGHT_WEB_AUTH_SHARED_SECRET_PATH takes precedence
+# The environment variable FLIGHT_LOGIN_SHARED_SECRET_PATH takes precedence
 #
 # NOTE: The path should be absolute. Relative paths have an undefined behaviour
 #-------------------------------------------------------------------------------
-# shared_secret: /path/to/flight-web-auth/etc/share-secret.conf
+# shared_secret: /path/to/flight-login/etc/share-secret.conf
 
 #-------------------------------------------------------------------------------
 # Token Expiry
@@ -69,9 +69,9 @@
 #-------------------------------------------------------------------------------
 # Issuer
 # Used to set the iss field in the JWT
-# The environment variable FLIGHT_WEB_AUTH_ISSUER takes precedence
+# The environment variable FLIGHT_LOGIN_ISSUER takes precedence
 #-------------------------------------------------------------------------------
-# issuer: web-auth
+# issuer: login-api
 
 #-------------------------------------------------------------------------------
 # Log Level
@@ -83,6 +83,6 @@
 #-------------------------------------------------------------------------------
 # Cookie name
 # Specify the name to use for the sso cookie
-# The environment variable FLIGHT_WEB_AUTH_SSO_COOKIE_NAME takes precedence
+# The environment variable FLIGHT_LOGIN_SSO_COOKIE_NAME takes precedence
 #-------------------------------------------------------------------------------
-# sso_cookie_name: flight_web_auth
+# sso_cookie_name: flight_login
