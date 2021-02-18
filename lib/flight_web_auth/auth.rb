@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2021-present Alces Flight Ltd.
 #
@@ -25,23 +24,56 @@
 #
 # For more information on Flight Web Auth, please visit:
 # https://github.com/openflighthpc/flight-web-auth-api
-#===============================================================================
+#==============================================================================
 
 module FlightWebAuth
-  # Injects the logger into the core module
-  extend Console
+  Auth = Struct.new(:encoded) do
+    def self.build(cookie, header)
+      if cookie
+        new(cookie)
+      elsif match = /\ABearer (.*)\Z/.match(header || '')
+        new(match[1])
+      else
+        new('')
+      end
+    end
 
-  autoload(:Auth, 'flight_web_auth/auth')
-  autoload(:Configuration, 'flight_web_auth/configuration')
+    def valid?
+      !decoded[:invalid]
+    end
 
-  def self.app
-    # XXX: Eventually extract this to a Application object when the need arises
-    @app ||= Struct.new(:config).new(
-      Configuration.load(Pathname.new('..').expand_path(__dir__))
-    )
-  end
+    def forbidden?
+      decoded[:forbidden]
+    end
 
-  def self.config
-    app.config
+    def username
+      decoded['username']
+    end
+
+    def token
+      decoded
+    end
+
+    private
+
+    def decoded
+      @decoded ||= begin
+        JWT.decode(
+          encoded,
+          FlightWebAuth.config.shared_secret,
+          true,
+          { algorithm: 'HS256' },
+        ).first.tap do |hash|
+          unless hash['username']
+            hash[:invalid] = true
+            hash[:forbidden] = true
+          end
+        end
+      rescue JWT::VerificationError
+        { invalid: true, forbidden: true }
+      rescue JWT::DecodeError
+        { invalid: true }
+      end
+    end
   end
 end

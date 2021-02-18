@@ -92,15 +92,16 @@ before do
 end
 
 # Require the Content-Type and Accept headers to be set correctly
-before method: :post do
-  # Not sure why we need this check, but we do.
+before do
   next if env['REQUEST_METHOD'] == 'OPTIONS'
 
-  unless request.content_type == 'application/json'
-    raise UnsupportedMediaType, 'Content-Type must be application/json'
-  end
   unless request.accept?('application/json')
     raise NotAcceptable, 'Accept must be application/json'
+  end
+
+  next if %w(GET DELETE).include? env['REQUEST_METHOD']
+  unless request.content_type == 'application/json'
+    raise UnsupportedMediaType, 'Content-Type must be application/json'
   end
 end
 
@@ -110,34 +111,76 @@ use Rack::Parser, parsers: {
 
 helpers do
   def shared_secret
-    @shared_secret ||= File.read(FlightWebAuth.config.shared_secret_path)
+    FlightWebAuth.config.shared_secret
   end
 
-  def set_sso_cookie(auth_token, expires)
-    domain = 
-      if request.host == 'localhost'
-        'localhost'
-      elsif (request.host !~ /^[\d.]+$/) && (request.host =~ DOMAIN_REGEXP)
-        ".#{$&}"
-      end
+  def sso_cookie_domain
+    if request.host == 'localhost'
+      'localhost'
+    elsif (request.host !~ /^[\d.]+$/) && (request.host =~ DOMAIN_REGEXP)
+      ".#{$&}"
+    end
+  end
 
+  def set_sso_cookie(auth_token)
     response.set_cookie(
       FlightWebAuth.app.config.sso_cookie_name,
-      value: auth_token,
-      domain: domain,
-      path: '/',
-      expires: Time.at(expires),
-      secure: request.scheme == 'https',
+      domain: sso_cookie_domain,
+      expires: Time.at(expiration),
       http_only: true,
+      path: '/',
       same_site: :strict,
+      secure: request.scheme == 'https',
+      value: auth_token,
     )
+  end
+
+  def delete_sso_cookie
+    response.delete_cookie(
+      FlightWebAuth.app.config.sso_cookie_name,
+      domain: sso_cookie_domain,
+      http_only: true,
+      path: '/',
+      same_site: :strict,
+      secure: request.scheme == 'https',
+    )
+  end
+
+  def timestamp_now
+    @_timestamp_now ||= Time.now.to_i
+  end
+
+  def expiration
+    timestamp_now + FlightWebAuth.config.token_expiry * 86400
+  end
+
+  def create_auth_token(passwd, gecos_name)
+    jwt_body = {
+      username: passwd.name,
+      name: gecos_name,
+      iat: timestamp_now,
+      nbf: timestamp_now,
+      exp: expiration,
+      iss: FlightWebAuth.config.issuer
+    }
+    JWT.encode(jwt_body, shared_secret, 'HS256')
+  end
+
+  def payload(passwd, gecos_name, auth_token)
+    {
+      user: {
+        username: passwd.name,
+        name: gecos_name,
+        authentication_token: auth_token,
+      }
+    }
   end
 end
 
 if FlightWebAuth.config.cross_origin_domain
   options "*" do
-    response.headers["Allow"] = "POST, OPTIONS"
-    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    response.headers["Allow"] = "GET, DELETE, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Methods"] = "GET, DELETE, POST, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept"
     status 200
     ''
@@ -165,28 +208,32 @@ post '/sign-in' do
 
   # Generates the responds
   passwd = Etc.getpwnam(username)
-  now = Time.now.to_i
-  expires = now + FlightWebAuth.config.token_expiry * 86400
   gecos_name = (passwd.gecos || "").split(',').first
-  jwt_body = {
-    username: passwd.name,
-    name: gecos_name,
-    iat: now,
-    nbf: now,
-    exp: expires,
-    iss: FlightWebAuth.config.issuer
-  }
-  auth_token = JWT.encode(jwt_body, shared_secret, 'HS256')
-  payload = {
-    user: {
-      username: passwd.name,
-      name: gecos_name,
-      authentication_token: auth_token,
-    }
-  }
-  set_sso_cookie(auth_token, expires)
+  auth_token = create_auth_token(passwd, gecos_name)
+  set_sso_cookie(auth_token)
 
-  # Return the payload
   status 201
-  payload.to_json
+  payload(passwd, gecos_name, auth_token).to_json
+end
+
+get '/session' do
+  auth = FlightWebAuth::Auth.build(
+    request.cookies[FlightWebAuth.app.config.sso_cookie_name], env['HTTP_AUTHORIZATION']
+  )
+
+  unless auth.valid?
+    raise Forbidden, 'you do not have permission to access this service'
+  end
+
+  passwd = Etc.getpwnam(auth.username)
+  gecos_name = (passwd.gecos || "").split(',').first
+  auth_token = JWT.encode(auth.token, shared_secret, 'HS256')
+  set_sso_cookie(auth_token)
+  status 200
+  payload(passwd, gecos_name, auth_token).to_json
+end
+
+delete '/sign-out' do
+  delete_sso_cookie
+  status 204
 end

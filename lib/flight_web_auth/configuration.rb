@@ -98,5 +98,13 @@ module FlightWebAuth
       @log_level = level
       FlightWebAuth.logger.send("#{@log_level}!")
     end
+
+    def shared_secret
+      @shared_secret ||= if File.exists?(shared_secret_path)
+        File.read(shared_secret_path)
+      else
+        raise ConfigError, 'The shared_secret_path does not exist!'
+      end
+    end
   end
 end
