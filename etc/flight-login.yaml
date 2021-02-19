@@ -86,3 +86,10 @@
 # The environment variable FLIGHT_LOGIN_SSO_COOKIE_NAME takes precedence
 #-------------------------------------------------------------------------------
 # sso_cookie_name: flight_login
+
+#-------------------------------------------------------------------------------
+# Cookie domain
+# Specify the domain to use for the sso cookie
+# The environment variable FLIGHT_LOGIN_SSO_COOKIE_DOMAIN takes precedence
+#-------------------------------------------------------------------------------
+# sso_cookie_domain:
