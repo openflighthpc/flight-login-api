@@ -3,7 +3,7 @@
 #==============================================================================
 # Copyright (C) 2021-present Alces Flight Ltd.
 #
-# This file is part of Flight Web Auth.
+# This file is part of Flight Login.
 #
 # This program and the accompanying materials are made available under
 # the terms of the Eclipse Public License 2.0 which is available at
@@ -11,7 +11,7 @@
 # terms made available by Alces Flight Ltd - please direct inquiries
 # about licensing to licensing@alces-flight.com.
 #
-# Flight Web Auth is distributed in the hope that it will be useful, but
+# Flight Login is distributed in the hope that it will be useful, but
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR
 # IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS
 # OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
@@ -19,20 +19,20 @@
 # details.
 #
 # You should have received a copy of the Eclipse Public License 2.0
-# along with Flight Web Auth. If not, see:
+# along with Flight Login. If not, see:
 #
 #  https://opensource.org/licenses/EPL-2.0
 #
-# For more information on Flight Web Auth, please visit:
-# https://github.com/openflighthpc/flight-web-auth-api
+# For more information on Flight Login, please visit:
+# https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
-module FlightWebAuth
+module FlightLogin
   class Configuration
-    autoload(:Loader, 'flight_web_auth/configuration/loader')
+    autoload(:Loader, 'flight_login/configuration/loader')
 
-    PRODUCTION_PATH = 'etc/flight-web-auth.yaml'
-    PATH_GENERATOR = ->(env) { "etc/flight-web-auth.#{env}.yaml" }
+    PRODUCTION_PATH = 'etc/flight-login.yaml'
+    PATH_GENERATOR = ->(env) { "etc/flight-login.#{env}.yaml" }
 
     class ConfigError < StandardError; end
 
@@ -41,6 +41,11 @@ module FlightWebAuth
         name: 'bind_address',
         env_var: true,
         default: 'tcp://127.0.0.1:922'
+      },
+      {
+        name: 'cross_origin_domain',
+        env_var: true,
+        default: nil,
       },
       {
         name: 'pam_service',
@@ -55,7 +60,7 @@ module FlightWebAuth
       {
         name: 'issuer',
         env_var: true,
-        default: 'web-auth'
+        default: 'login-api'
       },
       {
         name: 'shared_secret_path',
@@ -68,6 +73,15 @@ module FlightWebAuth
         name: 'log_level',
         env_var: true,
         default: 'info'
+      },
+      {
+        name: 'sso_cookie_name',
+        env_var: true,
+        default: 'flight_login',
+      },
+      {
+        name: 'sso_cookie_domain',
+        env_var: true
       }
     ]
     attr_accessor(*ATTRIBUTES.map { |a| a[:name] })
@@ -86,7 +100,15 @@ module FlightWebAuth
 
     def log_level=(level)
       @log_level = level
-      FlightWebAuth.logger.send("#{@log_level}!")
+      FlightLogin.logger.send("#{@log_level}!")
+    end
+
+    def shared_secret
+      @shared_secret ||= if File.exists?(shared_secret_path)
+        File.read(shared_secret_path)
+      else
+        raise ConfigError, 'The shared_secret_path does not exist!'
+      end
     end
   end
 end

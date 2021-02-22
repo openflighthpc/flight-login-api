@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2021-present Alces Flight Ltd.
 #
@@ -25,29 +24,56 @@
 #
 # For more information on Flight Login, please visit:
 # https://github.com/openflighthpc/flight-login-api
-#===============================================================================
+#==============================================================================
 
-source "https://rubygems.org"
+module FlightLogin
+  Auth = Struct.new(:encoded) do
+    def self.build(cookie, header)
+      if cookie
+        new(cookie)
+      elsif match = /\ABearer (.*)\Z/.match(header || '')
+        new(match[1])
+      else
+        new('')
+      end
+    end
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+    def valid?
+      !decoded[:invalid]
+    end
 
-gem 'activesupport', require: 'active_support'
-gem 'console'
-gem 'rake'
-gem 'rack-parser', :require => 'rack/parser'
-gem 'rpam-ruby19', require: 'rpam'
-gem 'puma'
-gem 'sinatra'
-gem 'sinatra-cross_origin'
-gem 'jwt'
+    def forbidden?
+      decoded[:forbidden]
+    end
 
-group :development, :test do
-  gem 'pry'
-  gem 'pry-byebug'
-end
+    def username
+      decoded['username']
+    end
 
-group :test do
-  gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
+    def token
+      decoded
+    end
+
+    private
+
+    def decoded
+      @decoded ||= begin
+        JWT.decode(
+          encoded,
+          FlightLogin.config.shared_secret,
+          true,
+          { algorithm: 'HS256' },
+        ).first.tap do |hash|
+          unless hash['username']
+            hash[:invalid] = true
+            hash[:forbidden] = true
+          end
+        end
+      rescue JWT::VerificationError
+        { invalid: true, forbidden: true }
+      rescue JWT::DecodeError
+        { invalid: true }
+      end
+    end
+  end
 end
