@@ -29,5 +29,6 @@
 
 require_relative 'boot.rb'
 
+tag 'flight-login-api'
 bind FlightLogin.app.config.bind_address
 log_requests
