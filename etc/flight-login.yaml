@@ -58,7 +58,7 @@
 #
 # NOTE: The path should be absolute. Relative paths have an undefined behaviour
 #-------------------------------------------------------------------------------
-# shared_secret: /path/to/flight-login/etc/share-secret.conf
+# shared_secret_path: /path/to/flight-login/etc/share-secret.conf
 
 #-------------------------------------------------------------------------------
 # Token Expiry

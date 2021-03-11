@@ -58,11 +58,4 @@ unless FlightLogin.app.config.sso_cookie_domain
   exit 1
 end
 
-# Ensure a shared secret exists
-unless File.exists? FlightLogin.app.config.shared_secret_path
-  FlightLogin.logger.warn "Generating a shared secret"
-  File.write FlightLogin.config.shared_secret_path, SecureRandom.alphanumeric(40)
-  FileUtils.chmod 0400, FlightLogin.config.shared_secret_path
-end
-
 require_relative '../app'
