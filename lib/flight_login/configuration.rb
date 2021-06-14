@@ -37,6 +37,8 @@ module FlightLogin
     PRODUCTION_PATH = 'etc/flight-login.yaml'
     PATH_GENERATOR = ->(env) { "etc/flight-login.#{env}.yaml" }
 
+    RC = Dotenv.parse(File.join(Flight.root, 'etc/web-suite.rc'))
+
     class ConfigError < StandardError; end
 
     [
@@ -84,7 +86,8 @@ module FlightLogin
       },
       {
         name: 'sso_cookie_domain',
-        env_var: true
+        env_var: true,
+        default: ->() { RC["flight_WEB_SUITE_domain"] }
       }
     ].each do |attr|
       attribute(attr[:name], **attr)
