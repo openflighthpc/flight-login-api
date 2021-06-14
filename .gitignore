@@ -15,7 +15,7 @@
 /log
 /vendor
 tags
-etc/flight-login.*.local.yaml
+etc/login-api.*.local.yaml
 etc/shared-secret.conf
 .env.development.local
 /etc/web-suite.rc
