@@ -27,7 +27,6 @@
 # https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
-ENV['RACK_ENV'] ||= 'development'
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __dir__)
 
 require 'rubygems'
@@ -38,17 +37,28 @@ require 'pathname'
 require 'time'
 require 'securerandom'
 
-if ENV['RACK_ENV'] == 'development'
-  Bundler.require(:default, :development)
-else
-  Bundler.require(:default)
-end
+# NOTE: The RACK_ENV maybe modified during this require, so it must be done
+# before loading the Flight stub
+Bundler.require(:default)
 
-# Shared activesupport libraries
-require 'active_support/core_ext/hash/keys'
+# Limited use of dotenv to support setting flight_ENVIRONMENT=development.
+# NOTE: The GitHub .env.development default is 'development', but the underlying default
+#       is 'production' if both env files are omitted.
+require 'dotenv'
+dot_files = [ '../.env.development.local', '../.env.development' ].map do |file|
+  File.expand_path(file, __dir__)
+end
+Dotenv.load(*dot_files)
 
 lib = File.expand_path('../lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+require 'flight'
+
+Bundler.require(:default, :development) if Flight.env.development?
+
+# Shared activesupport libraries
+require 'active_support/core_ext/hash/keys'
 
 require 'flight_login'
 
