@@ -46,8 +46,8 @@
 # The environment variable FLIGHT_LOGIN_PAM_SERVICE takes precedence
 #
 # CAUTION: All authenticated requests must correspond with a linux user. Failure
-#          to do so will cause the cloudcmd process to fail. This should be the
-#          case for any pam service which uses 'pam_unix.so'.
+#          to do so may cause various external applications to fail.
+#          Any pam service which uses 'pam_unix.so' should be sufficient.
 #-------------------------------------------------------------------------------
 # pam_service: login
 
@@ -56,9 +56,14 @@
 # A private token which is used to cryptographically sign the generate token.
 # The environment variable FLIGHT_LOGIN_SHARED_SECRET_PATH takes precedence
 #
-# NOTE: The path should be absolute. Relative paths have an undefined behaviour
+#>>path<<
+# The path maybe absolute or relative. In production, relative paths will be
+# expanded from flight_ROOT (when set).
+#
+# In non-production environment (or when flight_ROOT is unset), relative
+# paths will be expanded from the install directory.
 #-------------------------------------------------------------------------------
-# shared_secret_path: /path/to/flight-login/etc/share-secret.conf
+# shared_secret_path: etc/share-secret.conf
 
 #-------------------------------------------------------------------------------
 # Token Expiry
