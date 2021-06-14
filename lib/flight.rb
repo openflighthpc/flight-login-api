@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2021-present Alces Flight Ltd.
 #
@@ -27,28 +26,31 @@
 # https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
-source "https://rubygems.org"
+require 'active_support/string_inquirer'
+require 'active_support/core_ext/object/blank'
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+module Flight
+  # Injects the logger into the core module
+  extend Console
 
-gem 'activesupport', require: 'active_support'
-gem 'console'
-gem 'rake'
-gem 'flight_configuration', github: 'openflighthpc/flight_configuration', tag: '0.3.0'
-gem 'rack-parser', :require => 'rack/parser'
-gem 'rpam-ruby19', require: 'rpam'
-gem 'puma'
-gem 'sinatra'
-gem 'sinatra-cross_origin'
-gem 'jwt'
+  class << self
+    def config
+      # TODO: Log warnings within here
+      @config ||= FlightLogin::Configuration.load
+    end
 
-group :development, :test do
-  gem 'pry'
-  gem 'pry-byebug'
-end
+    def root
+      @root ||= if env.production? && ENV["flight_ROOT"].present?
+        File.expand_path(ENV["flight_ROOT"])
+      else
+        File.expand_path('..', __dir__)
+      end
+    end
 
-group :test do
-  gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
+    def env
+      @env ||= ActiveSupport::StringInquirer.new(
+        ENV['RACK_ENV'].presence || "production"
+      )
+    end
+  end
 end

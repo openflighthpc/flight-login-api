@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2021-present Alces Flight Ltd.
 #
@@ -27,16 +26,20 @@
 # https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
+require 'flight_configuration'
+
 module FlightLogin
   class Configuration
-    autoload(:Loader, 'flight_login/configuration/loader')
+    extend FlightConfiguration::DSL
+
+    application_name 'login-api'
 
     PRODUCTION_PATH = 'etc/flight-login.yaml'
     PATH_GENERATOR = ->(env) { "etc/flight-login.#{env}.yaml" }
 
     class ConfigError < StandardError; end
 
-    ATTRIBUTES = [
+    [
       {
         name: 'bind_address',
         env_var: true,
@@ -46,6 +49,7 @@ module FlightLogin
         name: 'cross_origin_domain',
         env_var: true,
         default: nil,
+        required: false
       },
       {
         name: 'pam_service',
@@ -65,9 +69,8 @@ module FlightLogin
       {
         name: 'shared_secret_path',
         env_var: true,
-        default: ->(root) do
-          root.join('etc/shared-secret.conf')
-        end
+        default: 'etc/shared-secret.config',
+        transform: relative_to(Flight.root)
       },
       {
         name: 'log_level',
@@ -83,24 +86,13 @@ module FlightLogin
         name: 'sso_cookie_domain',
         env_var: true
       }
-    ]
-    attr_accessor(*ATTRIBUTES.map { |a| a[:name] })
-
-    def self.load(root)
-      if ENV['RACK_ENV'] == 'production'
-        Loader.new(root, root.join(PRODUCTION_PATH)).load
-      else
-        paths = [
-          root.join(PATH_GENERATOR.call(ENV['RACK_ENV'])),
-          root.join(PATH_GENERATOR.call("#{ENV['RACK_ENV']}.local")),
-        ]
-        Loader.new(root, paths).load
-      end
+    ].each do |attr|
+      attribute(attr[:name], **attr)
     end
 
     def log_level=(level)
       @log_level = level
-      FlightLogin.logger.send("#{@log_level}!")
+      Flight.logger.send("#{@log_level}!")
     end
 
     def shared_secret

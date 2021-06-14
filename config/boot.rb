@@ -52,10 +52,4 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'flight_login'
 
-# Ensure the sso_cookie_domain is set
-unless FlightLogin.app.config.sso_cookie_domain
-  FlightLogin.logger.fatal "The sso_cookie_domain configuration has not been set!"
-  exit 1
-end
-
 require_relative '../app'

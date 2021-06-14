@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/openflighthpc/flight_configuration
+  revision: 3db7ff43eb0236b7324b4e92d13ebd8ba79093f3
+  tag: 0.3.0
+  specs:
+    flight_configuration (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -73,6 +80,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   console
+  flight_configuration!
   jwt
   pry
   pry-byebug

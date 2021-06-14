@@ -27,21 +27,22 @@
 # https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
+require 'forwardable'
+
+autoload(:Flight, 'flight')
+
 module FlightLogin
-  # Injects the logger into the core module
-  extend Console
+  class << self
+    extend Forwardable
+
+    def_delegators Flight, :config, :logger
+  end
 
   autoload(:Auth, 'flight_login/auth')
   autoload(:Configuration, 'flight_login/configuration')
 
+  # TODO: Replace me permanently with the Flight stub
   def self.app
-    # XXX: Eventually extract this to a Application object when the need arises
-    @app ||= Struct.new(:config).new(
-      Configuration.load(Pathname.new('..').expand_path(__dir__))
-    )
-  end
-
-  def self.config
-    app.config
+    @app ||= Struct.new(:config).new(config)
   end
 end
