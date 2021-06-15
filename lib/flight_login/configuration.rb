@@ -71,7 +71,7 @@ module FlightLogin
       {
         name: 'shared_secret_path',
         env_var: true,
-        default: 'etc/shared-secret.config',
+        default: 'etc/shared-secret.conf',
         transform: relative_to(Flight.root)
       },
       {
@@ -102,7 +102,7 @@ module FlightLogin
       @shared_secret ||= if File.exists?(shared_secret_path)
         File.read(shared_secret_path)
       else
-        raise ConfigError, 'The shared_secret_path does not exist!'
+        raise ConfigError, "The shared_secret_path does not exist! #{shared_secret_path}"
       end
     end
   end

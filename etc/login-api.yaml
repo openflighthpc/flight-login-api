@@ -32,13 +32,12 @@
 #-------------------------------------------------------------------------------
 # bind_address: tcp://127.0.0.1:922
 
-
 #-------------------------------------------------------------------------------
 # Cross Origin Domain
 # Optional domain(s) to permit cross original requests from.
 # The environment variable FLIGHT_LOGIN_CROSS_ORIGIN_DOMAIN takes precedence
 #-------------------------------------------------------------------------------
-# cross_origin_domain: any
+# cross_origin_domain:
 
 #-------------------------------------------------------------------------------
 # Pam Authentication Service
