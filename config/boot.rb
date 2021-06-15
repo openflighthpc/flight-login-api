@@ -27,6 +27,16 @@
 # https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
+# Converts the legacy FLIGHT_LOGIN_* env vars to the idiomatic format
+# NOTE: Remove on the next major release
+LEGACY_REGEX = /\AFLIGHT_LOGIN_(?<key>.*)\Z/
+ENV.each do |env, value|
+  match = LEGACY_REGEX.match(env)
+  next unless match
+  key = match.named_captures['key'].downcase
+  ENV["flight_LOGIN_API_#{key}"] ||= value
+end
+
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __dir__)
 
 require 'rubygems'
