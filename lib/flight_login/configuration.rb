@@ -60,7 +60,7 @@ module FlightLogin
       },
       {
         name: 'token_expiry',
-        env_var: false,
+        env_var: true,
         default: 7
       },
       {
