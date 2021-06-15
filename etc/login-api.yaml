@@ -62,7 +62,7 @@
 # In non-production environment (or when flight_ROOT is unset), relative
 # paths will be expanded from the install directory.
 #-------------------------------------------------------------------------------
-# shared_secret_path: etc/share-secret.conf
+# shared_secret_path: etc/shared-secret.conf
 
 #-------------------------------------------------------------------------------
 # Token Expiry
