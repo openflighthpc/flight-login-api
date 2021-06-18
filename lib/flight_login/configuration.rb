@@ -87,7 +87,7 @@ module FlightLogin
       {
         name: 'sso_cookie_domain',
         env_var: true,
-        default: ->() { RC["flight_WEB_SUITE_domain"] }
+        default: RC["flight_WEB_SUITE_domain"]
       }
     ].each do |attr|
       attribute(attr[:name], **attr)
