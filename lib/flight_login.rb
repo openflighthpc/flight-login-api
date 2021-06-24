@@ -27,17 +27,9 @@
 # https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
-require 'forwardable'
-
 autoload(:Flight, 'flight')
 
 module FlightLogin
-  class << self
-    extend Forwardable
-
-    def_delegators Flight, :config, :logger
-  end
-
   autoload(:Auth, 'flight_login/auth')
   autoload(:Configuration, 'flight_login/configuration')
 end

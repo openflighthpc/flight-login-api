@@ -30,7 +30,7 @@
 require_relative 'config/boot'
 
 configure do
-  LOGGER = FlightLogin.logger
+  LOGGER = Flight.logger
   enable :logging, :dump_errors
   set :raise_errors, true
 end
