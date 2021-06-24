@@ -40,9 +40,4 @@ module FlightLogin
 
   autoload(:Auth, 'flight_login/auth')
   autoload(:Configuration, 'flight_login/configuration')
-
-  # TODO: Replace me permanently with the Flight stub
-  def self.app
-    @app ||= Struct.new(:config).new(config)
-  end
 end

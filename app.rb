@@ -36,7 +36,7 @@ configure do
   set :raise_errors, true
   set :show_exceptions, false
 
-  enable :cross_origin if FlightLogin.config.cross_origin_domain
+  enable :cross_origin if Flight.config.cross_origin_domain
 end
 
 not_found do
@@ -62,13 +62,13 @@ end
 
 class PamAuth
   def self.valid?(username, password)
-    Rpam.auth(username, password, service: FlightLogin.config.pam_service)
+    Rpam.auth(username, password, service: Flight.config.pam_service)
   end
 end
 
 before do
-  if FlightLogin.config.cross_origin_domain
-    origin = FlightLogin.config.cross_origin_domain
+  if Flight.config.cross_origin_domain
+    origin = Flight.config.cross_origin_domain
     if origin.to_s == 'any'
       origin = request.env['HTTP_X_ORIGIN'] || request.env['HTTP_ORIGIN']
     end
@@ -97,13 +97,13 @@ use Rack::Parser, parsers: {
 
 helpers do
   def shared_secret
-    FlightLogin.config.shared_secret
+    Flight.config.shared_secret
   end
 
   def set_sso_cookie(auth_token)
     response.set_cookie(
-      FlightLogin.app.config.sso_cookie_name,
-      domain: FlightLogin.config.sso_cookie_domain,
+      Flight.config.sso_cookie_name,
+      domain: Flight.config.sso_cookie_domain,
       expires: Time.at(expiration),
       http_only: true,
       path: '/',
@@ -115,8 +115,8 @@ helpers do
 
   def delete_sso_cookie
     response.delete_cookie(
-      FlightLogin.app.config.sso_cookie_name,
-      domain: FlightLogin.config.sso_cookie_domain,
+      Flight.config.sso_cookie_name,
+      domain: Flight.config.sso_cookie_domain,
       http_only: true,
       path: '/',
       same_site: :strict,
@@ -129,7 +129,7 @@ helpers do
   end
 
   def expiration
-    timestamp_now + FlightLogin.config.token_expiry * 86400
+    timestamp_now + Flight.config.token_expiry * 86400
   end
 
   def create_auth_token(passwd, gecos_name)
@@ -139,7 +139,7 @@ helpers do
       iat: timestamp_now,
       nbf: timestamp_now,
       exp: expiration,
-      iss: FlightLogin.config.issuer
+      iss: Flight.config.issuer
     }
     JWT.encode(jwt_body, shared_secret, 'HS256')
   end
@@ -155,7 +155,7 @@ helpers do
   end
 end
 
-if FlightLogin.config.cross_origin_domain
+if Flight.config.cross_origin_domain
   options "*" do
     response.headers["Allow"] = "GET, DELETE, POST, OPTIONS"
     response.headers["Access-Control-Allow-Methods"] = "GET, DELETE, POST, OPTIONS"
@@ -196,7 +196,7 @@ end
 
 get '/session' do
   auth = FlightLogin::Auth.build(
-    request.cookies[FlightLogin.app.config.sso_cookie_name], env['HTTP_AUTHORIZATION']
+    request.cookies[Flight.config.sso_cookie_name], env['HTTP_AUTHORIZATION']
   )
 
   unless auth.valid?
