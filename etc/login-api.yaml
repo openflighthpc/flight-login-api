@@ -28,48 +28,49 @@
 #-------------------------------------------------------------------------------
 # Bind Address
 # The address the api process will bind to
-# The environment variable FLIGHT_LOGIN_BIND_ADDRESS takes precedence
+# The environment variable flight_LOGIN_API_bind_address takes precedence
 #-------------------------------------------------------------------------------
 # bind_address: tcp://127.0.0.1:922
-
 
 #-------------------------------------------------------------------------------
 # Cross Origin Domain
 # Optional domain(s) to permit cross original requests from.
-# The environment variable FLIGHT_LOGIN_CROSS_ORIGIN_DOMAIN takes precedence
+# The environment variable flight_LOGIN_API_cross_origin_domain takes precedence
 #-------------------------------------------------------------------------------
-# cross_origin_domain: any
+# cross_origin_domain:
 
 #-------------------------------------------------------------------------------
 # Pam Authentication Service
 # Specify the pam service which will be used to authenticate the requests.
-# The environment variable FLIGHT_LOGIN_PAM_SERVICE takes precedence
+# The environment variable flight_LOGIN_API_pam_service takes precedence
 #
 # CAUTION: All authenticated requests must correspond with a linux user. Failure
-#          to do so will cause the cloudcmd process to fail. This should be the
-#          case for any pam service which uses 'pam_unix.so'.
+#          to do so may cause various external applications to fail.
+#          Any pam service which uses 'pam_unix.so' should be sufficient.
 #-------------------------------------------------------------------------------
 # pam_service: login
 
 #-------------------------------------------------------------------------------
 # Shared Secret Path
 # A private token which is used to cryptographically sign the generate token.
-# The environment variable FLIGHT_LOGIN_SHARED_SECRET_PATH takes precedence
+# The environment variable flight_LOGIN_API_shared_secret_path takes precedence
 #
-# NOTE: The path should be absolute. Relative paths have an undefined behaviour
+# Relative paths are expanded from flight_ROOT (or the install directory,
+# if flight_ROOT is unset).
 #-------------------------------------------------------------------------------
-# shared_secret_path: /path/to/flight-login/etc/share-secret.conf
+# shared_secret_path: etc/shared-secret.conf
 
 #-------------------------------------------------------------------------------
 # Token Expiry
 # How long the generated token is valid for in days.
+# The environment variable flight_LOGIN_API_token_expiry takes precedence
 #-------------------------------------------------------------------------------
 # token_expiry: 7
 
 #-------------------------------------------------------------------------------
 # Issuer
 # Used to set the iss field in the JWT
-# The environment variable FLIGHT_LOGIN_ISSUER takes precedence
+# The environment variable flight_LOGIN_API_issuer takes precedence
 #-------------------------------------------------------------------------------
 # issuer: login-api
 
@@ -77,19 +78,20 @@
 # Log Level
 # Specify the logging level
 # Valid levels are: fatal, error, warn, info, debug
+# The environment variable flight_LOGIN_API_log_level takes precedence
 #-------------------------------------------------------------------------------
 # log_level: info
 
 #-------------------------------------------------------------------------------
 # Cookie name
 # Specify the name to use for the sso cookie
-# The environment variable FLIGHT_LOGIN_SSO_COOKIE_NAME takes precedence
+# The environment variable flight_LOGIN_API_sso_cookie_name takes precedence
 #-------------------------------------------------------------------------------
 # sso_cookie_name: flight_login
 
 #-------------------------------------------------------------------------------
 # Cookie domain
 # Specify the domain to use for the sso cookie
-# The environment variable FLIGHT_LOGIN_SSO_COOKIE_DOMAIN takes precedence
+# The environment variable flight_LOGIN_API_sso_cookie_domain takes precedence
 #-------------------------------------------------------------------------------
 # sso_cookie_domain:

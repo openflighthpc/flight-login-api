@@ -60,7 +60,7 @@ module FlightLogin
       @decoded ||= begin
         JWT.decode(
           encoded,
-          FlightLogin.config.shared_secret,
+          Flight.config.shared_secret,
           true,
           { algorithm: 'HS256' },
         ).first.tap do |hash|

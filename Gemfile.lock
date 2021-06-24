@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/openflighthpc/flight_configuration
+  revision: 3db7ff43eb0236b7324b4e92d13ebd8ba79093f3
+  tag: 0.3.0
+  specs:
+    flight_configuration (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -13,6 +20,7 @@ GEM
     console (1.10.1)
       fiber-local
     diff-lcs (1.4.4)
+    dotenv (2.7.6)
     fiber-local (1.0.0)
     i18n (1.8.5)
       concurrent-ruby (~> 1.0)
@@ -73,6 +81,8 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   console
+  dotenv
+  flight_configuration!
   jwt
   pry
   pry-byebug

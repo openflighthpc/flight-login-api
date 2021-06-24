@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2021-present Alces Flight Ltd.
 #
@@ -27,16 +26,22 @@
 # https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
+require 'flight_configuration'
+
 module FlightLogin
   class Configuration
-    autoload(:Loader, 'flight_login/configuration/loader')
+    extend FlightConfiguration::DSL
+
+    application_name 'login-api'
 
     PRODUCTION_PATH = 'etc/flight-login.yaml'
     PATH_GENERATOR = ->(env) { "etc/flight-login.#{env}.yaml" }
 
+    RC = Dotenv.parse(File.join(Flight.root, 'etc/web-suite.rc'))
+
     class ConfigError < StandardError; end
 
-    ATTRIBUTES = [
+    [
       {
         name: 'bind_address',
         env_var: true,
@@ -46,6 +51,7 @@ module FlightLogin
         name: 'cross_origin_domain',
         env_var: true,
         default: nil,
+        required: false
       },
       {
         name: 'pam_service',
@@ -54,7 +60,7 @@ module FlightLogin
       },
       {
         name: 'token_expiry',
-        env_var: false,
+        env_var: true,
         default: 7
       },
       {
@@ -65,9 +71,8 @@ module FlightLogin
       {
         name: 'shared_secret_path',
         env_var: true,
-        default: ->(root) do
-          root.join('etc/shared-secret.conf')
-        end
+        default: 'etc/shared-secret.conf',
+        transform: relative_to(Flight.root)
       },
       {
         name: 'log_level',
@@ -81,33 +86,23 @@ module FlightLogin
       },
       {
         name: 'sso_cookie_domain',
-        env_var: true
+        env_var: true,
+        default: RC["flight_WEB_SUITE_domain"]
       }
-    ]
-    attr_accessor(*ATTRIBUTES.map { |a| a[:name] })
-
-    def self.load(root)
-      if ENV['RACK_ENV'] == 'production'
-        Loader.new(root, root.join(PRODUCTION_PATH)).load
-      else
-        paths = [
-          root.join(PATH_GENERATOR.call(ENV['RACK_ENV'])),
-          root.join(PATH_GENERATOR.call("#{ENV['RACK_ENV']}.local")),
-        ]
-        Loader.new(root, paths).load
-      end
+    ].each do |attr|
+      attribute(attr[:name], **attr)
     end
 
     def log_level=(level)
       @log_level = level
-      FlightLogin.logger.send("#{@log_level}!")
+      Flight.logger.send("#{@log_level}!")
     end
 
     def shared_secret
       @shared_secret ||= if File.exists?(shared_secret_path)
         File.read(shared_secret_path)
       else
-        raise ConfigError, 'The shared_secret_path does not exist!'
+        raise ConfigError, "The shared_secret_path does not exist! #{shared_secret_path}"
       end
     end
   end

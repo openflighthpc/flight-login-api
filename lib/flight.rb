@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2021-present Alces Flight Ltd.
 #
@@ -27,8 +26,31 @@
 # https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
-require_relative 'boot.rb'
+require 'active_support/string_inquirer'
+require 'active_support/core_ext/object/blank'
 
-tag 'flight-login-api'
-bind Flight.config.bind_address
-log_requests
+module Flight
+  # Injects the logger into the core module
+  extend Console
+
+  class << self
+    def config
+      # TODO: Log warnings within here
+      @config ||= FlightLogin::Configuration.load
+    end
+
+    def root
+      @root ||= if env.production? && ENV["flight_ROOT"].present?
+        File.expand_path(ENV["flight_ROOT"])
+      else
+        File.expand_path('..', __dir__)
+      end
+    end
+
+    def env
+      @env ||= ActiveSupport::StringInquirer.new(
+        ENV['RACK_ENV'].presence || "development"
+      )
+    end
+  end
+end

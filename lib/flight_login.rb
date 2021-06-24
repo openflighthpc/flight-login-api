@@ -27,21 +27,9 @@
 # https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
-module FlightLogin
-  # Injects the logger into the core module
-  extend Console
+autoload(:Flight, 'flight')
 
+module FlightLogin
   autoload(:Auth, 'flight_login/auth')
   autoload(:Configuration, 'flight_login/configuration')
-
-  def self.app
-    # XXX: Eventually extract this to a Application object when the need arises
-    @app ||= Struct.new(:config).new(
-      Configuration.load(Pathname.new('..').expand_path(__dir__))
-    )
-  end
-
-  def self.config
-    app.config
-  end
 end

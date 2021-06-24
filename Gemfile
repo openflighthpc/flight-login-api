@@ -32,8 +32,10 @@ source "https://rubygems.org"
 git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
 gem 'activesupport', require: 'active_support'
+gem 'dotenv'
 gem 'console'
 gem 'rake'
+gem 'flight_configuration', github: 'openflighthpc/flight_configuration', tag: '0.3.0'
 gem 'rack-parser', :require => 'rack/parser'
 gem 'rpam-ruby19', require: 'rpam'
 gem 'puma'

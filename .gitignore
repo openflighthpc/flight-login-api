@@ -15,8 +15,10 @@
 /log
 /vendor
 tags
-etc/flight-login.*.local.yaml
+etc/login-api.*.local.yaml
 etc/shared-secret.conf
+.env.development.local
+/etc/web-suite.rc
 
 # NOTE: This is a general ignore all yaml files in the config directory
 # There are a couple of configs which have manually be checked in
