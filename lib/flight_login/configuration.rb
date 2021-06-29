@@ -86,7 +86,7 @@ module FlightLogin
       },
       {
         name: 'sso_cookie_domain',
-        env_var: true,
+        env_var: false,
         default: RC["flight_WEB_SUITE_domain"]
       }
     ].each do |attr|
