@@ -45,14 +45,6 @@ module Flight
     end
 
     def root
-      @root ||= if env.production? && ENV["flight_ROOT"].present?
-        File.expand_path(ENV["flight_ROOT"])
-      else
-        File.expand_path('..', __dir__)
-      end
-    end
-
-    def root
       @root ||=
         if env.integrated? && ENV["flight_ROOT"].present?
           File.expand_path(ENV["flight_ROOT"])
