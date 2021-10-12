@@ -56,7 +56,7 @@ module FlightLogin
       {
         name: 'pam_service',
         env_var: true,
-        default: 'login'
+        default: 'sshd'
       },
       {
         name: 'token_expiry',

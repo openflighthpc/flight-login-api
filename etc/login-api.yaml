@@ -48,7 +48,7 @@
 #          to do so may cause various external applications to fail.
 #          Any pam service which uses 'pam_unix.so' should be sufficient.
 #-------------------------------------------------------------------------------
-# pam_service: login
+# pam_service: sshd
 
 #-------------------------------------------------------------------------------
 # Shared Secret Path
