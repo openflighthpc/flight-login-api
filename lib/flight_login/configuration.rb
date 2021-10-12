@@ -30,7 +30,8 @@ require 'flight_configuration'
 
 module FlightLogin
   class Configuration
-    extend FlightConfiguration::DSL
+    include FlightConfiguration::DSL
+    include FlightConfiguration::RichActiveValidationErrorMessage
 
     application_name 'login-api'
 
@@ -93,10 +94,17 @@ module FlightLogin
       attribute(attr[:name], **attr)
     end
 
-    def log_level=(level)
-      @log_level = level
-      Flight.logger.send("#{@log_level}!")
-    end
+    attribute :log_path, required: false,
+          default: '/dev/stdout',
+          transform: ->(path) do
+            if path
+              relative_to(root_path).call(path).tap do |full_path|
+                FileUtils.mkdir_p File.dirname(full_path)
+              end
+            else
+              $stderr
+            end
+          end
 
     def shared_secret
       @shared_secret ||= if File.exists?(shared_secret_path)

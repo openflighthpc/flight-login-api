@@ -29,14 +29,18 @@
 require 'active_support/string_inquirer'
 require 'active_support/core_ext/object/blank'
 
-module Flight
-  # Injects the logger into the core module
-  extend Console
+require 'logger'
 
+module Flight
   class << self
     def config
-      # TODO: Log warnings within here
-      @config ||= FlightLogin::Configuration.load
+      return @config if @config
+      @config = FlightLogin::Configuration.load
+      @config.tap do |c|
+        logger.info("Flight.env set to #{env.inspect}")
+        logger.info("Flight.root set to #{root.inspect}")
+        c.__logs__.log_with(logger)
+      end
     end
 
     def root
@@ -47,10 +51,50 @@ module Flight
       end
     end
 
+    def root
+      @root ||=
+        if env.integrated? && ENV["flight_ROOT"].present?
+          File.expand_path(ENV["flight_ROOT"])
+        elsif env.integrated? && !ENV["flight_ROOT"].present?
+          raise RuntimeError, "flight_ROOT not set for integrated environment"
+        else
+          File.expand_path('..', __dir__)
+        end
+    end
+
     def env
       @env ||= ActiveSupport::StringInquirer.new(
-        ENV['RACK_ENV'].presence || "development"
+        ENV['RACK_ENV'].presence || "standalone"
       )
+    end
+
+    def logger
+      @logger ||= Logger.new(config.log_path).tap do |log|
+        next if config.log_level == 'disabled'
+
+        # Determine the level
+        level = case config.log_level
+        when 'fatal'
+          Logger::FATAL
+        when 'error'
+          Logger::ERROR
+        when 'warn'
+          Logger::WARN
+        when 'info'
+          Logger::INFO
+        when 'debug'
+          Logger::DEBUG
+        end
+
+        if level.nil?
+          # Log bad log levels
+          log.level = Logger::ERROR
+          log.error "Unrecognized log level: #{config.log_level}"
+        else
+          # Sets good log levels
+          log.level = level
+        end
+      end
     end
   end
 end
