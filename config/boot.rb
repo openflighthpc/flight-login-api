@@ -37,39 +37,39 @@ ENV.each do |env, value|
   ENV["flight_LOGIN_API_#{key}"] ||= value
 end
 
+# Bootstrap Bundler
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __dir__)
-
 require 'rubygems'
 require 'bundler'
+Bundler.setup(:default)
+
+# Limited use of dotenv to set flight_ENVIRONMENT and RACK_ENV
+require 'dotenv'
+dot_files = [ '../.flight-environment' ].map do |file|
+  File.expand_path(file, __dir__)
+end
+Dotenv.load(*dot_files)
+ENV['RACK_ENV'] ||= 'development'
+
+# Require the gems
+if ENV['flight_ENVIRONMENT'] == 'development'
+  Bundler.require(:default, :development)
+else
+  Bundler.require(:default)
+end
+
+# Add the lib directory onto the LOAD_PATH
+lib = File.expand_path('../lib', __dir__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+# Commonly used libraries used within the application
 require 'yaml'
 require 'json'
 require 'pathname'
 require 'time'
 require 'securerandom'
 
-# NOTE: The RACK_ENV maybe modified during this require, so it must be done
-# before loading the Flight stub
-Bundler.require(:default)
-
-# Limited use of dotenv to support setting flight_ENVIRONMENT=development.
-# NOTE: The GitHub .env.development default is 'development', but the underlying default
-#       is 'production' if both env files are omitted.
-require 'dotenv'
-dot_files = [ '../.env.development.local', '../.env.development' ].map do |file|
-  File.expand_path(file, __dir__)
-end
-Dotenv.load(*dot_files)
-
-lib = File.expand_path('../lib', __dir__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-
+# Require the applciation
 require 'flight'
-
-Bundler.require(:default, :development) if Flight.env.development?
-
-# Shared activesupport libraries
-require 'active_support/core_ext/hash/keys'
-
 require 'flight_login'
-
 require_relative '../app'

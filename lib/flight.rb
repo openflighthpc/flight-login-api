@@ -37,6 +37,7 @@ module Flight
       return @config if @config
       @config = FlightLogin::Configuration.load
       @config.tap do |c|
+        logger.info("RACK_ENV set to #{ENV['RACK_ENV']}")
         logger.info("Flight.env set to #{env.inspect}")
         logger.info("Flight.root set to #{root.inspect}")
         c.__logs__.log_with(logger)
