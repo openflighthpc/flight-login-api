@@ -1,18 +1,64 @@
-# Flight Login
+# Flight Login API
 
-%SUMMARY%
+API server which authenticates user credentials using [pam](http://www.linux-pam.org/).
 
 ## Overview
 
-What is it?
+Flight Login API provides a web interface for authenticating user credentials
+using `PAM`. It will then issue a signed `Bearer Token` which can be used to
+gain access to other `flight-web-suite` services.
 
 ## Installation
 
-How is it installed?
+### Installing with the OpenFlight package repos
+
+Flight Login API is available as part of the *Flight Web Suite*.  This is
+the easiest method for installing Flight Login API and all its dependencies. 
+It is documented in [the OpenFlight
+Documentation](https://use.openflighthpc.org/installing-web-suite/install.html#installing-flight-web-suite).
+
+### Manual Installation
+
+#### Prerequisites
+
+Flight Login API is developed and tested with Ruby version `2.7.1` and
+`bundler` `2.1.4`.  Other versions may work but currently are not officially
+supported.
+
+#### Install Flight Login API
+
+The following will install from source using `git`.  The `master` branch is
+the current development version and may not be appropriate for a production
+installation. Instead a tagged version should be checked out.
+
+```
+git clone https://github.com/alces-flight/flight-login-api.git
+cd flight-login-api
+git checkout <tag>
+bundle config set --local with default
+bundle config set --local without development
+bundle install
+```
+
+The manual installation of Flight Login API comes preconfigured to run in
+development mode.  If installing Flight Login API manually for production
+usage you will want to follow the instructions to [set the environment
+mode](docs/environment-modes.md) to `standalone`.
 
 ## Configuration
 
-Any required or optional configuration?
+Flight Login API comes preconfigured to work out of the box without
+further configuration.  However, it is likely that you will want to change its
+`pam_service`, `bind_address` and `base_url`.
+
+Please refer to the [configuration file](etc/login-api.yaml) for more details
+and a full list of configuration options.
+
+### Environment Modes
+
+If Flight Login API has been installed manually for production usage you
+will want to follow the instructions to [set the environment
+mode](docs/environment-modes.md) to `standalone`.
 
 ## Operation
 
