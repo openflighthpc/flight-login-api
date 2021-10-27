@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2021-present Alces Flight Ltd.
 #
@@ -27,18 +26,11 @@
 # https://github.com/openflighthpc/flight-login-api
 #===============================================================================
 
-require_relative 'config/boot'
-require_relative 'config/post_boot'
-require_relative 'app'
+# Commonly used libraries used within the application
+require 'yaml'
+require 'json'
+require 'pathname'
+require 'time'
+require 'securerandom'
 
-configure do
-  LOGGER = Flight.logger
-  enable :logging, :dump_errors
-  set :raise_errors, true
-end
-
-app = Rack::Builder.new do
-  map('/v0') { run Sinatra::Application }
-end
-
-run app
+Flight.assert_config_valid

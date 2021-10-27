@@ -35,13 +35,25 @@ module Flight
   class << self
     def config
       return @config if @config
-      @config = FlightLogin::Configuration.load
+      @config = FlightLogin::Configuration.build
       @config.tap do |c|
         logger.info("RACK_ENV set to #{ENV['RACK_ENV']}")
         logger.info("Flight.env set to #{env.inspect}")
         logger.info("Flight.root set to #{root.inspect}")
         c.__logs__.log_with(logger)
       end
+    end
+
+    def assert_config_valid
+      unless config.valid?
+        raise FlightJobScriptAPI::ConfigError, config.rich_error_message
+      end
+    end
+
+    def env
+      @env ||= ActiveSupport::StringInquirer.new(
+        ENV['RACK_ENV'].presence || "standalone"
+      )
     end
 
     def root
@@ -53,12 +65,6 @@ module Flight
         else
           File.expand_path('..', __dir__)
         end
-    end
-
-    def env
-      @env ||= ActiveSupport::StringInquirer.new(
-        ENV['RACK_ENV'].presence || "standalone"
-      )
     end
 
     def logger
