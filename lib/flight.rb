@@ -45,9 +45,7 @@ module Flight
     end
 
     def assert_config_valid
-      unless config.valid?
-        raise FlightJobScriptAPI::ConfigError, config.rich_error_message
-      end
+      config.validate!
     end
 
     def env

@@ -29,6 +29,8 @@
 require 'flight_configuration'
 
 module FlightLogin
+  class ConfigError < StandardError; end
+
   class Configuration
     include FlightConfiguration::DSL
     include FlightConfiguration::RichActiveValidationErrorMessage
@@ -39,8 +41,6 @@ module FlightLogin
     PATH_GENERATOR = ->(env) { "etc/flight-login.#{env}.yaml" }
 
     RC = Dotenv.parse(File.join(Flight.root, 'etc/web-suite.rc'))
-
-    class ConfigError < StandardError; end
 
     [
       {
@@ -105,6 +105,11 @@ module FlightLogin
               $stderr
             end
           end
+
+    def validate!
+      super
+      shared_secret
+    end
 
     def shared_secret
       @shared_secret ||= if File.exists?(shared_secret_path)
